@@ -4,14 +4,10 @@ import os
 import argparse
 import requests
 from urllib.parse import quote
-from datetime import datetime, timedelta
+from datetime import datetime
 from selenium import webdriver
-from selenium.webdriver import DesiredCapabilities
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as ec
-from selenium.webdriver.firefox.options import Options
-import geckodriver_autoinstaller
+from selenium.webdriver.chrome.options import Options
+import chromedriver_autoinstaller
 import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -31,8 +27,8 @@ def get_authorization_code(client_id, username, password):
     try:
         options = Options()
         options.add_argument("--headless")
-        geckodriver_autoinstaller.install()
-        driver = webdriver.Firefox(options=options)
+        chromedriver_autoinstaller.install()
+        driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(30)
         driver.get(url)
         driver.find_element_by_name("IDToken1").send_keys(username)
