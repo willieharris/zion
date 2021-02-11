@@ -52,10 +52,15 @@ def get_access_token(client_id, client_secret, code):
     headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
     }
-    payload = f'?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={uri}'
-    print(payload)
+    params = {
+        'grant_type': 'authorizztion_code',
+        'client_id': client_id,
+        'client_secret': client_secret,
+        'code': code,
+        'redirect_uri': uri
+    }
     try:
-        response = requests.request('POST', url, data=payload, headers=headers)
+        response = requests.post(url, params=params, headers=headers)
         response.raise_for_status()
     except Exception as err:
         raise Exception('ERROR Getting WebEx access token: ' + str(err))
