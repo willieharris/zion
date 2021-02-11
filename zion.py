@@ -81,15 +81,18 @@ def download_webex_video(token, video_file, date):
         response = requests.get(f'{url}{list_params}', headers=headers)
         response.raise_for_status()
         json_response = response.json()
-        recording_id = json_response['items'][0]['id']
-        response = requests.get(f'{url}/{recording_id}', headers=headers)
-        response.raise_for_status()
-        json_response = response.json()
-        download_link = json_response['temporaryDirectDownloadLinks']['recordingDownloadLink']
-        response = requests.get(download_link)
-        response.raise_for_status()
-        with open(video_file, 'wb') as f_h:
-            f_h.write(response.content)
+        if json_response['items']:
+            recording_id = json_response['items'][0]['id']
+            response = requests.get(f'{url}/{recording_id}', headers=headers)
+            response.raise_for_status()
+            json_response = response.json()
+            download_link = json_response['temporaryDirectDownloadLinks']['recordingDownloadLink']
+            response = requests.get(download_link)
+            response.raise_for_status()
+            with open(video_file, 'wb') as f_h:
+                f_h.write(response.content)
+        else:
+            raise Exception('ERROR There are no videos for this date')
     except Exception as err:
         raise Exception('ERROR Downloading recording from Webex: ' + str(err))
 
@@ -136,13 +139,13 @@ def main(argv):
     username = os.environ['WEBEX_USERNAME']
     password = os.environ['WEBEX_PASSWORD']
     video_file = argv.metadata[0]
-    video_title = argv.metadata[1]
-    video_desc = argv.metadata[2]
+    recording_date = argv.metadata[1]
+    video_title = argv.metadata[2]
+    video_desc = argv.metadata[3]
 
     try:
-        yesterday = datetime.now() - timedelta(1)
-        yesterday_date = yesterday.replace(hour=20, minute=0, second=0, microsecond=0)
-        date = datetime.isoformat(yesterday_date)
+        formatted_recording_date = datetime.fromisoformat(recording_date)
+        date = datetime.isoformat(formatted_recording_date)
         print('Getting Webex authorization code...')
         authorization_code = get_authorization_code(client_id, username, password)
         print('Getting Webex access token...')
@@ -150,7 +153,7 @@ def main(argv):
         print('Downloading Webex video...')
         download_webex_video(access_token, video_file, date)
         print('Uploading video to YouTube...')
-        upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(yesterday_date, '%m-%d-%Y'))
+        upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'))
         print('Done')
     except Exception as err:
         print(str(err))    
@@ -158,8 +161,8 @@ def main(argv):
 
 def arg_parse(args):
     parser = argparse.ArgumentParser(description='Download Webex video and upload to YouTube')
-    parser.add_argument('metadata', metavar='S', type=str, nargs=3,
-        help='zion <video file name> <video title> <video description>')
+    parser.add_argument('metadata', metavar='S', type=str, nargs=4,
+        help='zion <video file name> <date of recording in YYYY-MM-DD isoformat> <video title> <video description>')
     return parser.parse_args(args)
 
 if __name__ == '__main__':
