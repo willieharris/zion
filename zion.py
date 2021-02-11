@@ -152,7 +152,8 @@ def main(argv):
         upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'))
         print('Done')
     except Exception as err:
-        print(str(err))    
+        print(str(err))
+        exit(1)
 
 
 def arg_parse(args):
