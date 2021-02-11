@@ -60,7 +60,7 @@ def get_access_token(client_id, client_secret, code):
         'redirect_uri': uri
     }
     try:
-        response = requests.post(url, params=params, headers=headers)
+        response = requests.post(url, params=params, data={}, headers=headers)
         response.raise_for_status()
     except Exception as err:
         raise Exception('ERROR Getting WebEx access token: ' + str(err))
