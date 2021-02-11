@@ -53,7 +53,7 @@ def get_access_token(client_id, client_secret, code):
     'Content-Type': 'application/x-www-form-urlencoded'
     }
     payload = f'grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={uri}'
-    
+    print(payload)
     try:
         response = requests.request('POST', url, data=payload, headers=headers)
         response.raise_for_status()
