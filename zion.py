@@ -53,7 +53,7 @@ def get_access_token(client_id, client_secret, code):
     'Content-Type': 'application/x-www-form-urlencoded'
     }
     params = {
-        'grant_type': 'authorizztion_code',
+        'grant_type': 'authorization_code',
         'client_id': client_id,
         'client_secret': client_secret,
         'code': code,
