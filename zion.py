@@ -8,10 +8,11 @@ from datetime import datetime
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
-import google_auth_oauthlib.flow
 import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
+from google_auth_oauthlib.flow import Flow
+
 
 
 BASE_URL = 'https://webexapis.com/v1'
@@ -37,12 +38,36 @@ def get_authorization_code(client_id, username, password):
         driver.find_element_by_id("Button1").click()
         url_code = driver.current_url
         code = url_code.split('?')[1].split('&')[0].split('=')[1]
-        driver.close()
     except Exception as err:
-        driver.close()
         raise Exception('ERROR Getting WebEx authorization code: ' + str(err))
-    
+    finally:
+        driver.close()
+
     return code
+
+def authorize_app(url):
+    """
+    Authorize this app to have access to the account. A Chrome browser must already be started and authenticated to the Google account. 
+    The Chrome browser must be started with the following parameters: Google\ Chrome --remote-debugging-port=9222 --user-data-dir="ChromeProfile"
+    """
+    try:
+        options = Options()
+        options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
+        chromedriver_autoinstaller.install()
+        driver = webdriver.Chrome(options=options)
+        driver.implicitly_wait(30)
+        driver.get(url)        
+        driver.find_element_by_xpath("//div[contains(text(),'Mt. Zion Church - Cary, NC')]").click()
+        driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]/div[2]").click()
+        driver.find_element_by_xpath("//body/div[5]/div[1]/div[2]/div[3]/div[1]/span[1]").click()
+        driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/button[1]").click()
+        element = driver.find_element_by_tag_name("textarea")
+        code = element.text
+    except Exception as err:
+        raise Exception('ERROR Authorizing app: ' + str(err))
+        
+    return code
+
 
 def get_access_token(client_id, client_secret, code):
     """
@@ -100,8 +125,11 @@ def upload_to_youtube(video_file, video_title, video_desc, date):
     client_secrets_file = "client_secrets.json"
 
     # Get credentials and create an API client
-    flow = google_auth_oauthlib.flow.InstalledAppFlow.from_client_secrets_file(client_secrets_file, scopes)
-    credentials = flow.run_console()
+    flow = Flow.from_client_secrets_file(client_secrets_file, scopes, redirect_uri='urn:ietf:wg:oauth:2.0:oob')
+    auth_uri = flow.authorization_url(prompt='consent')
+    code = authorize_app(auth_uri[0])
+    flow.fetch_token(code=code)
+    credentials = flow.credentials
     youtube = googleapiclient.discovery.build(api_service_name, api_version, credentials=credentials, cache_discovery=False)
 
     title = f'{video_title} {date}'
