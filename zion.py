@@ -65,7 +65,7 @@ def authorize_app(url):
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
     except Exception as err:
-        driver.save_screenshot(f"authorize_app_error.png")
+        driver.save_screenshot("authorize_app_error.png")
         raise Exception('ERROR Authorizing app: ' + str(err))
         
     return code
