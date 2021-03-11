@@ -1,11 +1,13 @@
 import sys
-import json
 import os
 import argparse
 import requests
 from urllib.parse import quote
 from datetime import datetime
 from selenium import webdriver
+from selenium.webdriver.common.by import By
+from selenium.webdriver.support.ui import WebDriverWait
+from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
 import chromedriver_autoinstaller
 import googleapiclient.discovery
@@ -57,10 +59,14 @@ def authorize_app(url):
         chromedriver_autoinstaller.install()
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(30)
-        driver.get(url)        
+        driver.get(url)
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
         driver.find_element_by_xpath("//div[contains(text(),'Mt. Zion Church - Cary, NC')]").click()
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]/div[2]]"))) 
         driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]/div[2]").click()
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//body/div[5]/div[1]/div[2]/div[3]/div[1]/span[1]")))
         driver.find_element_by_xpath("//body/div[5]/div[1]/div[2]/div[3]/div[1]/span[1]").click()
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/button[1]")))
         driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/button[1]").click()
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
