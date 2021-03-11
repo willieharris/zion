@@ -42,7 +42,7 @@ def get_authorization_code(client_id, username, password):
         code = url_code.split('?')[1].split('&')[0].split('=')[1]
     except Exception as err:
         driver.save_screenshot("get_authorization_code_error.png")
-        raise Exception('ERROR Getting WebEx authorization code: ' + str(err))
+        raise Exception(f"ERROR Getting WebEx authorization code: {err.__class__.__name__}: {str(err)}")
     finally:
         driver.close()
 
@@ -72,7 +72,7 @@ def authorize_app(url):
         code = element.text
     except Exception as err:
         driver.save_screenshot("authorize_app_error.png")
-        raise Exception('ERROR Authorizing app: ' + str(err))
+        raise Exception(f"ERROR Authorizing app: {err.__class__.__name__}: {str(err)}")
         
     return code
 
@@ -135,6 +135,7 @@ def upload_to_youtube(video_file, video_title, video_desc, date):
     # Get credentials and create an API client
     flow = Flow.from_client_secrets_file(client_secrets_file, scopes, redirect_uri='urn:ietf:wg:oauth:2.0:oob')
     auth_uri = flow.authorization_url(prompt='consent')
+    print(auth_uri[0])
     code = authorize_app(auth_uri[0])
     flow.fetch_token(code=code)
     credentials = flow.credentials
