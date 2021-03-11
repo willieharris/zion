@@ -39,6 +39,7 @@ def get_authorization_code(client_id, username, password):
         url_code = driver.current_url
         code = url_code.split('?')[1].split('&')[0].split('=')[1]
     except Exception as err:
+        driver.save_screenshot("get_authorization_code_error.png")
         raise Exception('ERROR Getting WebEx authorization code: ' + str(err))
     finally:
         driver.close()
@@ -64,6 +65,7 @@ def authorize_app(url):
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
     except Exception as err:
+        driver.save_screenshot(f"authorize_app_error.png")
         raise Exception('ERROR Authorizing app: ' + str(err))
         
     return code
