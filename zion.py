@@ -18,7 +18,7 @@ from google_auth_oauthlib.flow import Flow
 
 
 BASE_URL = 'https://webexapis.com/v1'
-scopes = ["https://www.googleapis.com/auth/youtube.upload"]
+scopes = ["https://www.googleapis.com/auth/youtube.upload", "https://www.googleapis.com/auth/youtube", "https://www.googleapis.com/auth/youtube.readonly"]
 uri = "https%3A%2F%2Fmtzioncary.org"
 
 def get_authorization_code(client_id, username, password):
@@ -124,7 +124,7 @@ def download_webex_video(token, video_file, date):
     except Exception as err:
         raise Exception('ERROR Downloading recording from Webex: ' + str(err))
 
-def upload_to_youtube(video_file, video_title, video_desc, date):
+def upload_to_youtube(video_file, video_title, video_desc, date, playlist_name=None):
     """
     Upload video to YouTube
     """
@@ -158,8 +158,34 @@ def upload_to_youtube(video_file, video_title, video_desc, date):
         media_body=MediaFileUpload(video_file)
     )
     response = request.execute()
-
-    print(response)
+    print('...video uploaded')
+    
+    if playlist_name is not None:
+        video_id = response['id']
+        request = youtube.playlists().list(
+            part="snippet",
+            mine=True
+        )
+        response = request.execute()
+        y = [x for x in response['items'] if x['snippet']['title'] == playlist_name]
+        if len(y) == 1:
+            playlist_id = y[0]['id']
+            request = youtube.playlistItems().insert(
+                part="snippet",
+                body={
+                    "snippet": {
+                        "playlistId": playlist_id,
+                        "resourceId": {
+                            "kind": "youtube#video",
+                            "videoId": video_id
+                        }
+                    }
+                }
+            )
+            response = request.execute()
+            print(f'...video assigned to playlist {playlist_name}')
+        else:
+            print(f'...{playlist_name} was either not found or an error occured')
 
 def main(argv):
     if "WEBEX_CLIENT_ID" not in os.environ or "WEBEX_CLIENT_SECRET" not in os.environ or "WEBEX_USERNAME" not in os.environ or "WEBEX_PASSWORD" not in os.environ:
@@ -170,10 +196,13 @@ def main(argv):
     client_secret = os.environ['WEBEX_CLIENT_SECRET']
     username = os.environ['WEBEX_USERNAME']
     password = os.environ['WEBEX_PASSWORD']
+    playlist_name = None
     video_file = argv.metadata[0]
     recording_date = argv.metadata[1]
     video_title = argv.metadata[2]
     video_desc = argv.metadata[3]
+    if len(argv.metadata) > 4:
+        playlist_name = argv.metadata[4]
 
     try:
         formatted_recording_date = datetime.fromisoformat(recording_date)
@@ -185,7 +214,7 @@ def main(argv):
         print('Downloading Webex video...')
         download_webex_video(access_token, video_file, date)
         print('Uploading video to YouTube...')
-        upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'))
+        upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'), playlist_name)
         print('Done')
     except Exception as err:
         print(str(err))
@@ -194,8 +223,8 @@ def main(argv):
 
 def arg_parse(args):
     parser = argparse.ArgumentParser(description='Download Webex video and upload to YouTube')
-    parser.add_argument('metadata', metavar='S', type=str, nargs=4,
-        help='zion <video file name> <date of recording in YYYY-MM-DD isoformat> <video title> <video description>')
+    parser.add_argument('metadata', metavar='S', type=str, nargs='+',
+        help='zion <video file name> <date of recording in YYYY-MM-DD isoformat> <video title> <video description> <OPTIONAL: name of playlist to add video to>')
     return parser.parse_args(args)
 
 if __name__ == '__main__':
