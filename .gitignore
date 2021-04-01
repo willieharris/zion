@@ -1,3 +1,4 @@
 *.mp4
+*.png
 client_secrets.json
 geckodriver.log
