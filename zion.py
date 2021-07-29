@@ -65,11 +65,10 @@ def authorize_app(url):
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]"))) 
         driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]").click()
         print('Grant Zion permissions...')
-        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "i3")))
+        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
         driver.find_element_by_id("i3").click()
         driver.find_element_by_id("i6").click()
         driver.find_element_by_id("i9").click()
-        #WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[1]/div[1]/button[1]")))
         driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
