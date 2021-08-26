@@ -69,6 +69,7 @@ def authorize_app(url):
         driver.find_element_by_id("i3").click()
         driver.find_element_by_id("i6").click()
         driver.find_element_by_id("i9").click()
+        driver.save_screenshot("authorize_app.png")
         driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
@@ -166,6 +167,7 @@ def upload_to_youtube(video_file, video_title, video_desc, date, playlist_name=N
         video_id = response['id']
         request = youtube.playlists().list(
             part="snippet",
+            maxResults=100,
             mine=True
         )
         response = request.execute()
