@@ -25,7 +25,7 @@ def get_authorization_code(client_id, username, password):
     """
     Uses Selenium to log in and get the Webex authorization code from the URL
     """
-    url = BASE_URL + '/authorize' + f'?response_type=code&client_id={client_id}&redirect_uri={uri}&scope=meeting%3Arecordings_read%20spark%3Akms&state=whj'
+    url = BASE_URL + '/authorize' + f'?response_type=code&client_id={client_id}&redirect_uri={uri}&scope=meeting%3Arecordings_read%20spark%3Akms%20meeting%3Arecordings_write&state=whj'
 
     try:
         options = Options()
@@ -97,11 +97,46 @@ def get_access_token(client_id, client_secret, code):
     json_response = response.json()
     return json_response['access_token']
 
+def delete_webex_videos(token, date):
+    """
+    Download yesterday's video from Webex
+    """
+    url = f'{BASE_URL}/recordings'
+    headers = {
+        'timezone':'EST',
+        'Authorization':'Bearer {}'.format(token)
+    }
+    del_headers = {
+        'Content-Type':'application/json',
+        'Authorization':'Bearer {}'.format(token)
+    }
+    date_str = f'{date}-01'
+    formatted_from_date = datetime.fromisoformat(date_str)
+    from_date = datetime.isoformat(formatted_from_date)
+    formatted_to_date = datetime(formatted_from_date.year, formatted_from_date.month + 1, 1)
+    to_date = datetime.isoformat(formatted_to_date)
+    list_params = f'?from={quote(from_date)}&to={quote(to_date)}'
+
+    try:
+        response = requests.get(f'{url}{list_params}', headers=headers)
+        response.raise_for_status()
+        json_response = response.json()
+        if json_response['items']:
+            for item in json_response['items']:
+                recording_id = item['id']
+                print(f"...deleting video {item['topic']}...")
+                response = requests.delete(f'{url}/{recording_id}', headers=del_headers)
+                response.raise_for_status()
+        else:
+            raise Exception('ERROR There are no videos for this month')
+    except Exception as err:
+        raise Exception('ERROR Deleting recording from Webex: ' + str(err))
+
 def download_webex_video(token, video_file, date):
     """
     Download yesterday's video from Webex
     """
-    url = BASE_URL + '/recordings'
+    url = f'{BASE_URL}/recordings'
     headers = {
         'timezone':'EST',
         'Authorization':'Bearer {}'.format(token)
@@ -201,34 +236,54 @@ def main(argv):
     username = os.environ['WEBEX_USERNAME']
     password = os.environ['WEBEX_PASSWORD']
     playlist_name = None
-    video_file = argv.metadata[0]
-    recording_date = argv.metadata[1]
-    video_title = argv.metadata[2]
-    video_desc = argv.metadata[3]
-    if len(argv.metadata) > 4:
-        playlist_name = argv.metadata[4]
 
-    try:
-        formatted_recording_date = datetime.fromisoformat(recording_date)
-        date = datetime.isoformat(formatted_recording_date)
-        print('Getting Webex authorization code...')
-        authorization_code = get_authorization_code(client_id, username, password)
-        print('Getting Webex access token...')
-        access_token = get_access_token(client_id, client_secret, authorization_code)
-        print('Downloading Webex video...')
-        download_webex_video(access_token, video_file, date)
-        print('Uploading video to YouTube...')
-        upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'), playlist_name)
-        print('Done')
-    except Exception as err:
-        print(str(err))
+    if argv.metadata[0] == 'upload':
+        video_file = argv.metadata[1]
+        recording_date = argv.metadata[2]
+        video_title = argv.metadata[3]
+        video_desc = argv.metadata[4]
+        if len(argv.metadata) > 5:
+            playlist_name = argv.metadata[5]
+
+        try:
+            formatted_recording_date = datetime.fromisoformat(recording_date)
+            date = datetime.isoformat(formatted_recording_date)
+            print('Getting Webex authorization code...')
+            authorization_code = get_authorization_code(client_id, username, password)
+            print('Getting Webex access token...')
+            access_token = get_access_token(client_id, client_secret, authorization_code)
+            print('Downloading Webex video...')
+            download_webex_video(access_token, video_file, date)
+            print('Uploading video to YouTube...')
+            upload_to_youtube(video_file, video_title, video_desc, datetime.strftime(formatted_recording_date, '%m-%d-%Y'), playlist_name)
+            print('Done')
+        except Exception as err:
+            print(str(err))
+            exit(1)
+    
+    elif argv.metadata[0] == 'cleanup':
+        try:
+            date = argv.metadata[1]
+            print('Getting Webex authorization code...')
+            authorization_code = get_authorization_code(client_id, username, password)
+            print('Getting Webex access token...')
+            access_token = get_access_token(client_id, client_secret, authorization_code)
+            print('Cleaning up old Webex recordings...')
+            delete_webex_videos(access_token, date)
+            print('Done')
+        except Exception as err:
+            print(str(err))
+            exit(1)
+    
+    else:
+        print(f"ERROR incorrect parameter {argv.metadata[0]}. First parameter must be 'upload' or 'cleanup'.")
         exit(1)
 
 
 def arg_parse(args):
     parser = argparse.ArgumentParser(description='Download Webex video and upload to YouTube')
     parser.add_argument('metadata', metavar='S', type=str, nargs='+',
-        help='zion <video file name> <date of recording in YYYY-MM-DD isoformat> <video title> <video description> <OPTIONAL: name of playlist to add video to>')
+        help='zion upload <video file name> <date of recording in YYYY-MM-DD isoformat> <video title> <video description> <OPTIONAL: name of playlist to add video to> | zion cleanup <month to delete in YYYY-MM isoformat')
     return parser.parse_args(args)
 
 if __name__ == '__main__':
