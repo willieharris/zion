@@ -14,6 +14,7 @@ import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
 from google_auth_oauthlib.flow import Flow
+import time
 
 
 
@@ -69,6 +70,7 @@ def authorize_app(url):
         driver.find_element_by_id("i3").click()
         driver.find_element_by_id("i6").click()
         driver.find_element_by_id("i9").click()
+        time.sleep(5)
         driver.save_screenshot("authorize_app.png")
         driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
         element = driver.find_element_by_tag_name("textarea")
