@@ -4,6 +4,7 @@ import argparse
 import requests
 from urllib.parse import quote
 from datetime import datetime
+from dateutil.relativedelta import relativedelta
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
@@ -101,7 +102,7 @@ def get_access_token(client_id, client_secret, code):
 
 def delete_webex_videos(token, date):
     """
-    Download yesterday's video from Webex
+    Delete all videos for specified month from Webex
     """
     url = f'{BASE_URL}/recordings'
     headers = {
@@ -115,7 +116,7 @@ def delete_webex_videos(token, date):
     date_str = f'{date}-01'
     formatted_from_date = datetime.fromisoformat(date_str)
     from_date = datetime.isoformat(formatted_from_date)
-    formatted_to_date = datetime(formatted_from_date.year, formatted_from_date.month + 1, 1)
+    formatted_to_date = formatted_from_date + relativedelta(months=1)
     to_date = datetime.isoformat(formatted_to_date)
     list_params = f'?from={quote(from_date)}&to={quote(to_date)}'
 
