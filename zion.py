@@ -118,7 +118,7 @@ def delete_webex_videos(token, date):
     from_date = datetime.isoformat(formatted_from_date)
     formatted_to_date = formatted_from_date + relativedelta(months=1)
     to_date = datetime.isoformat(formatted_to_date)
-    list_params = f'?from={quote(from_date)}&to={quote(to_date)}'
+    list_params = f'?siteUrl=mtzion.webex.com&from={quote(from_date)}&to={quote(to_date)}'
 
     try:
         response = requests.get(f'{url}{list_params}', headers=headers)
@@ -144,7 +144,7 @@ def download_webex_video(token, video_file, date):
         'timezone':'EST',
         'Authorization':'Bearer {}'.format(token)
     }
-    list_params = f'?from={quote(date)}'
+    list_params = f'?siteUrl=mtzion.webex.com&from={quote(date)}'
 
     try:
         response = requests.get(f'{url}{list_params}', headers=headers)
@@ -255,6 +255,7 @@ def main(argv):
             authorization_code = get_authorization_code(client_id, username, password)
             print('Getting Webex access token...')
             access_token = get_access_token(client_id, client_secret, authorization_code)
+            print(access_token)
             print('Downloading Webex video...')
             download_webex_video(access_token, video_file, date)
             print('Uploading video to YouTube...')
