@@ -68,6 +68,7 @@ def authorize_app(url):
         driver.find_element_by_xpath("//body/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/div[2]/div[1]/div[2]/div[1]/div[2]/div[1]/div[1]/button[1]").click()
         print('Grant Zion permissions...')
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
+        time.sleep(5)
         driver.find_element_by_xpath("//input[@aria-labelledby='selectioni2']").click()
         driver.find_element_by_xpath("//input[@aria-labelledby='selectioni3']").click()
         driver.find_element_by_xpath("//input[@aria-labelledby='selectioni4']").click()
