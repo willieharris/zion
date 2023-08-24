@@ -34,6 +34,9 @@ def get_authorization_code(client_id, username, password):
         options.add_argument("--headless")
         chromedriver_autoinstaller.install()
         driver = webdriver.Chrome(options=options)
+    except Exception as err:
+        raise Exception(f"ERROR Getting WebEx authorization code: {err.__class__.__name__}: {str(err)}")
+    try:
         driver.implicitly_wait(30)
         driver.get(url)
         driver.find_element_by_name("IDToken1").send_keys(username)
