@@ -61,7 +61,7 @@ def authorize_app(url):
     try:
         options = Options()
         options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-        chromedriver_autoinstaller.install()
+        chromedriver_autoinstaller_fix.install()
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(30)
         driver.get(url)
