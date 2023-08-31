@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
-import chromedriver_autoinstaller
+import chromedriver_autoinstaller_fix
 import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
@@ -32,7 +32,7 @@ def get_authorization_code(client_id, username, password):
     try:
         options = Options()
         options.add_argument("--headless")
-        chromedriver_autoinstaller.install()
+        chromedriver_autoinstaller_fix.install()
         driver = webdriver.Chrome(options=options)
     except Exception as err:
         raise Exception(f"ERROR Getting WebEx authorization code: {err.__class__.__name__}: {str(err)}")
