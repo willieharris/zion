@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
-import chromedriver_autoinstaller_fix
+import chromedriver_autoinstaller
 import googleapiclient.discovery
 import googleapiclient.errors
 from googleapiclient.http import MediaFileUpload
@@ -32,7 +32,7 @@ def get_authorization_code(client_id, username, password):
     try:
         options = Options()
         options.add_argument("--headless")
-        chromedriver_autoinstaller_fix.install()
+        chromedriver_autoinstaller.install()
         driver = webdriver.Chrome(options=options)
     except Exception as err:
         raise Exception(f"ERROR Getting WebEx authorization code: {err.__class__.__name__}: {str(err)}")
@@ -61,7 +61,7 @@ def authorize_app(url):
     try:
         options = Options()
         options.add_experimental_option("debuggerAddress", "127.0.0.1:9222")
-        chromedriver_autoinstaller_fix.install()
+        chromedriver_autoinstaller.install()
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(30)
         driver.get(url)
@@ -88,13 +88,14 @@ def get_access_token(client_id, client_secret, code):
     """
     Get the Webex access token
     """
-    url = BASE_URL + '/access_token' + f'?grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={uri}'
+    url = BASE_URL + '/access_token'
+    payload = f'grant_type=authorization_code&client_id={client_id}&client_secret={client_secret}&code={code}&redirect_uri={uri}'
     headers = {
     'Content-Type': 'application/x-www-form-urlencoded'
     }
 
     try:
-        response = requests.request("POST", url, data={}, headers=headers)
+        response = requests.request("POST", url, data=payload, headers=headers)
         response.raise_for_status()
     except Exception as err:
         raise Exception('ERROR Getting WebEx access token: ' + str(err))
