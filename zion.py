@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
+from selenium.common.exceptions import TimeoutException
 import chromedriver_autoinstaller
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -70,10 +71,13 @@ def authorize_app(url):
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
         driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
         print('Grant Zion permissions...')
-        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
-        driver.find_element_by_id("i1").click()
-        time.sleep(5)
-        driver.save_screenshot("authorize_app.png")
+        try:
+            WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
+            driver.find_element_by_id("i1").click()
+            time.sleep(5)
+            driver.save_screenshot("authorize_app.png")
+        except TimeoutException:
+            pass
         driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
