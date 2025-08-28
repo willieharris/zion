@@ -73,7 +73,7 @@ def authorize_app(url):
         print('Grant Zion permissions...')
         try:
             WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
-            driver.find_element(By.TAG_NAME, "input")[0].click()
+            driver.find_element(By.TAG_NAME, "input").click()
             time.sleep(5)
             driver.save_screenshot("authorize_app.png")
         except TimeoutException:
