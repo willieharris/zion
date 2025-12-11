@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
 import chromedriver_autoinstaller
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -66,16 +66,29 @@ def authorize_app(url):
         driver = webdriver.Chrome(options=options)
         driver.implicitly_wait(30)
         driver.get(url)
-        elem = WebDriverWait(driver, 20).until(ec.element_to_be_clickable((By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")))
-        #WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")))
-        elem.click()
+
+        # robust click helper: wait until clickable, scroll into view, and fall back to JS click if needed
+        def safe_click(by, selector, wait=20):
+            elem = WebDriverWait(driver, wait).until(ec.element_to_be_clickable((by, selector)))
+            try:
+                elem.click()
+            except ElementClickInterceptedException:
+                driver.execute_script("arguments[0].scrollIntoView({block: 'center'});", elem)
+                time.sleep(0.5)
+                try:
+                    elem.click()
+                except ElementClickInterceptedException:
+                    driver.execute_script("arguments[0].click();", elem)
+            return elem
+
+        safe_click(By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
-        driver.find_element_by_xpath("//div[contains(text(),'Mt. Zion Church - Cary, NC')]").click()
+        safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
-        driver.find_element_by_type("button").click()
-        driver.find_element_by_xpath("//div[contains(text(),'Mt. Zion Church - Cary, NC')]").click()
+        safe_click(By.XPATH, "//button")  # use a generic safe_click for the button
+        safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
-        driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
+        safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('Grant Zion permissions...')
         try:
             WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
@@ -84,7 +97,7 @@ def authorize_app(url):
             driver.save_screenshot("authorize_app.png")
         except TimeoutException:
             pass
-        driver.find_element_by_xpath("//span[contains(text(),'Continue')]").click()
+        safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         element = driver.find_element_by_tag_name("textarea")
         code = element.text
     except Exception as err:
