@@ -85,7 +85,7 @@ def authorize_app(url):
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
-        safe_click(By.XPATH, "//button")  # use a generic safe_click for the button
+        safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
         safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
