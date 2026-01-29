@@ -83,8 +83,11 @@ def authorize_app(url):
 
         safe_click(By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")
         print('HERE A')
-        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
-        safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
+        try:
+            WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
+            safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
+        except TimeoutException:
+            safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('HERE B')
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
         safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
@@ -92,7 +95,6 @@ def authorize_app(url):
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         print('HERE D')
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
-        time.sleep(5)
         print('HERE E')
         safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('HERE F')
