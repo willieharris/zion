@@ -88,6 +88,7 @@ def authorize_app(url):
         safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
+        time.sleep(5)
         safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('Grant Zion permissions...')
         try:
