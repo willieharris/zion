@@ -87,6 +87,7 @@ def authorize_app(url):
             WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
             safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         except TimeoutException:
+            print('HERE A1')
             safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('HERE B')
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
