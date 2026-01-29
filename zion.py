@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
 import chromedriver_autoinstaller
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -82,11 +82,16 @@ def authorize_app(url):
             return elem
 
         safe_click(By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")
-        WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
-        safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
-        driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
-        safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
-        safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
+        try:
+            WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
+            safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
+        except StaleElementReferenceException:
+            safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
+        except TimeoutException:
+            safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
+        #driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
+        #safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
+        #safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
         safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('Grant Zion permissions...')
