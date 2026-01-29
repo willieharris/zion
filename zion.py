@@ -89,6 +89,9 @@ def authorize_app(url):
         except StaleElementReferenceException:
             print('HERE A1')
             safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
+        except TimeoutException:
+            print('HERE A2')
+            safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('HERE B')
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
         safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
