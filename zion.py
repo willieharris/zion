@@ -82,17 +82,20 @@ def authorize_app(url):
             return elem
 
         safe_click(By.XPATH, "//div[contains(text(),'mtzionchurchcary@gmail.com')]")
+        print('HERE A')
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
+        print('HERE B')
         driver.find_element_by_name("Passwd").send_keys(os.environ['GOOGLE_PASSWORD'])
         safe_click(By.ID, "passwordNext")  # use a generic safe_click for the button
+        print('HERE C')
         safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
-        print('HERE A')
+        print('HERE D')
         WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//span[contains(text(),'Continue')]")))
         time.sleep(5)
-        print('HERE B')
+        print('HERE E')
         safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
-        print('HERE C')
+        print('HERE F')
         print('Grant Zion permissions...')
         try:
             WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.ID, "developer_info_glif")))
