@@ -10,7 +10,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.chrome.options import Options
-from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException
+from selenium.common.exceptions import TimeoutException, ElementClickInterceptedException, StaleElementReferenceException
 import chromedriver_autoinstaller
 import googleapiclient.discovery
 import googleapiclient.errors
@@ -86,7 +86,7 @@ def authorize_app(url):
         try:
             WebDriverWait(driver, 20).until(ec.visibility_of_element_located((By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")))
             safe_click(By.XPATH, "//div[contains(text(),'Mt. Zion Church - Cary, NC')]")
-        except TimeoutException:
+        except StaleElementReferenceException:
             print('HERE A1')
             safe_click(By.XPATH, "//span[contains(text(),'Continue')]")
         print('HERE B')
